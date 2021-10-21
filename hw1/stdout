@@ -1,0 +1,250 @@
+1. (35%) Linear Regression Analysis for Wine Quality
+
+(a) (10%) Show the results of regression analysis as follows.
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                  grade   R-squared:                       0.495
+Model:                            OLS   Adj. R-squared:                  0.472
+Method:                 Least Squares   F-statistic:                     21.52
+Date:                Thu, 21 Oct 2021   Prob (F-statistic):           1.16e-70
+Time:                        17:34:58   Log-Likelihood:                -381.52
+No. Observations:                 620   AIC:                             819.0
+Df Residuals:                     592   BIC:                             943.1
+Df Model:                          27                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+const          2.0339      0.018    110.528      0.000       1.998       2.070
+f0            -0.0055      0.025     -0.224      0.823      -0.054       0.043
+f1             0.0440      0.028      1.571      0.117      -0.011       0.099
+f2             0.3140      0.035      9.028      0.000       0.246       0.382
+f3             0.0186      0.042      0.447      0.655      -0.063       0.100
+f4            -0.0035      0.038     -0.091      0.928      -0.078       0.072
+f5            -0.0740      0.030     -2.483      0.013      -0.133      -0.015
+f6            -0.0710      0.026     -2.742      0.006      -0.122      -0.020
+f7             0.0235      0.028      0.853      0.394      -0.031       0.078
+f8             0.0410      0.019      2.170      0.030       0.004       0.078
+f9          9.411e-18   2.11e-17      0.447      0.655    -3.2e-17    5.08e-17
+f10           -0.0446      0.021     -2.119      0.035      -0.086      -0.003
+f11           -0.0292      0.020     -1.438      0.151      -0.069       0.011
+f12           -0.0006      0.022     -0.027      0.979      -0.044       0.043
+f13            0.0336      0.024      1.412      0.159      -0.013       0.080
+f14           -0.1832      0.021     -8.898      0.000      -0.224      -0.143
+f15           -0.1061      0.019     -5.565      0.000      -0.144      -0.069
+f16           -0.0358      0.020     -1.756      0.080      -0.076       0.004
+f17            0.0633      0.019      3.409      0.001       0.027       0.100
+f18           -0.1904      0.021     -9.194      0.000      -0.231      -0.150
+f19            0.0278      0.026      1.051      0.294      -0.024       0.080
+f20            0.0126      0.020      0.644      0.520      -0.026       0.051
+f21           -0.0357      0.028     -1.263      0.207      -0.091       0.020
+f22            0.0747      0.021      3.533      0.000       0.033       0.116
+f23           -0.0088      0.020     -0.442      0.659      -0.048       0.030
+f24            0.0193      0.024      0.800      0.424      -0.028       0.067
+f25           -0.0679      0.020     -3.406      0.001      -0.107      -0.029
+f26           -0.0360      0.022     -1.625      0.105      -0.080       0.008
+f27           -0.0062      0.019     -0.324      0.746      -0.044       0.031
+==============================================================================
+Omnibus:                       39.669   Durbin-Watson:                   2.004
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              147.525
+Skew:                           0.090   Prob(JB):                     9.23e-33
+Kurtosis:                       5.383   Cond. No.                     1.45e+16
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The smallest eigenvalue is 9.66e-30. This might indicate that there are
+strong multicollinearity problems or that the design matrix is singular.
+
+(b) (5%) The fitting of the linear regression is a good idea? If yes, why? If no, why? What’s the possible reason of poor fitting?
+R-squared = 0.4953759883189156
+
+(c) (5%) Based on the results, rank the independent variables by p-values and which one are statistically significant variables with p-values<0.01? (i.e. 重要變數挑選)
+  Variable name       p-value
+0         const  0.000000e+00
+1           f18  6.355895e-19
+2            f2  2.430368e-18
+3           f14  6.896905e-18
+4           f15  3.971326e-08
+5           f22  4.429125e-04
+6           f17  6.967770e-04
+7           f25  7.041639e-04
+8            f6  6.295708e-03
+
+(d) (15%) Testify the underlying assumptions of regression (1) Normality, (2) Independence, and (3) Homogeneity of Variance with respect to residual.
+(1) Normality
+ShapiroResult(statistic=0.9345124363899231, pvalue=7.536043131996446e-16)
+NormaltestResult(statistic=39.66868689014282, pvalue=2.4325069491685703e-09)
+Jarque_beraResult(statistic=147.5249369922674, pvalue=0.0)
+KstestResult(statistic=0.2661699066389761, pvalue=2.8799549701646473e-39)
+(2) Independence
+(array([4]),) [5.09543255]
+(3) Homogeneity
+LeveneResult(statistic=45.22990221305838, pvalue=9.463377049626744e-232)
+BartlettResult(statistic=inf, pvalue=0.0)
+
+
+2. (30%) Data Preprocessing and Generalized Linear Model (GLM)/Logistic Regression
+
+(1) (5%) Provide the descriptive statistics. (i.e. exploratory data analysis, EDA) Eg. mean, variance, data distribution, # of missing value, # of outlier, etc.
+age                   38.581647
+fnlwgt            189778.366512
+education-num         10.080679
+capital-gain        1077.648844
+capital-loss          87.303830
+hours-per-week        40.437456
+dtype: float64
+age               1.860614e+02
+fnlwgt            1.114080e+10
+education-num     6.618890e+00
+capital-gain      5.454254e+07
+capital-loss      1.623769e+05
+hours-per-week    1.524590e+02
+dtype: float64
+4262
+2812
+
+(2) (10%) How to identify the outlier? How to impute the missing value?
+For age:
+222      90.0
+430      80.0
+918      81.0
+1040     90.0
+1168     88.0
+         ... 
+32277    90.0
+32367    90.0
+32459    85.0
+32494    82.0
+32525    81.0
+Name: age, Length: 121, dtype: float64
+For fnlwgt:
+37       544091.0
+40       507875.0
+182      633742.0
+192      523910.0
+215      635913.0
+           ...   
+31811    746432.0
+32035    566537.0
+32205    693066.0
+32208    539864.0
+32511    514716.0
+Name: fnlwgt, Length: 347, dtype: float64
+For education-num:
+160      2.0
+221      2.0
+224      1.0
+416      2.0
+463      2.0
+        ... 
+32306    2.0
+32359    1.0
+32403    2.0
+32425    2.0
+32432    1.0
+Name: education-num, Length: 219, dtype: float64
+For capital-gain:
+106      34095.0
+704      25236.0
+1246     99999.0
+1368     99999.0
+1482     99999.0
+          ...   
+31972    99999.0
+32090    99999.0
+32238    99999.0
+32370    27828.0
+32518    99999.0
+Name: capital-gain, Length: 215, dtype: float64
+For capital-loss:
+23       2042.0
+32       1408.0
+52       1902.0
+93       1573.0
+96       1902.0
+          ...  
+32416    1902.0
+32441    1887.0
+32443    1602.0
+32445    1669.0
+32458    1977.0
+Name: capital-loss, Length: 1470, dtype: float64
+For hours-per-week:
+10       80.0
+28       80.0
+77        2.0
+157       2.0
+189       1.0
+         ... 
+32469    99.0
+32476    84.0
+32494     3.0
+32525     1.0
+32531    99.0
+Name: hours-per-week, Length: 440, dtype: float64
+
+(3) (5%) How to transform the categorical variable to dummy variable?
+        age    fnlwgt  education-num  capital-gain  capital-loss  ...  native-country_ Trinadad&Tobago  native-country_ United-States  native-country_ Vietnam  native-country_ Yugoslavia  class_ >50K
+0      39.0   77516.0           13.0        2174.0           0.0  ...                                0                              1                        0                           0            0
+1      50.0   83311.0           13.0           0.0           0.0  ...                                0                              1                        0                           0            0
+2      38.0  215646.0            9.0           0.0           0.0  ...                                0                              1                        0                           0            0
+3      53.0  234721.0            7.0           0.0           0.0  ...                                0                              1                        0                           0            0
+4      28.0  338409.0           13.0           0.0           0.0  ...                                0                              0                        0                           0            0
+...     ...       ...            ...           ...           ...  ...                              ...                            ...                      ...                         ...          ...
+32556  27.0  257302.0           12.0           0.0           0.0  ...                                0                              1                        0                           0            0
+32557  40.0  154374.0            9.0           0.0           0.0  ...                                0                              1                        0                           0            1
+32558  58.0  151910.0            9.0           0.0           0.0  ...                                0                              1                        0                           0            0
+32559  22.0  201490.0            9.0           0.0           0.0  ...                                0                              1                        0                           0            0
+32560  52.0  287927.0            9.0       15024.0           0.0  ...                                0                              1                        0                           0            1
+
+[32561 rows x 98 columns]
+
+(4) (5%) How to “randomly” split the dataset into training dataset and testing dataset (eg. 80% vs. 20%)?
+(26048, 97) (6513, 97) (26048,) (6513,)
+
+(5) (5%) Please use the Generalized Linear Model (GLM) (OR Logistic Regression) to predict the “Class” in the testing dataset.
+0.7947182557961001
+
+
+3. (35%) Association Rule- Market Basket Analysis
+
+(1) (10%) How to handle the raw dataset via data preprocessing?
+      Instant food products  UHT-milk  abrasive cleaner  artif. sweetener  baby cosmetics  baby food   bags  ...  whipped/sour cream  whisky  white bread  white wine  whole milk  yogurt  zwieback
+0                     False     False             False             False           False      False  False  ...               False   False        False       False       False   False     False
+1                     False     False             False             False           False      False  False  ...               False   False        False       False       False    True     False
+2                     False     False             False             False           False      False  False  ...               False   False        False       False        True   False     False
+3                     False     False             False             False           False      False  False  ...               False   False        False       False       False    True     False
+4                     False     False             False             False           False      False  False  ...               False   False        False       False        True   False     False
+...                     ...       ...               ...               ...             ...        ...    ...  ...                 ...     ...          ...         ...         ...     ...       ...
+9830                  False     False             False             False           False      False  False  ...                True   False        False       False        True   False     False
+9831                  False     False             False             False           False      False  False  ...               False   False        False       False       False   False     False
+9832                  False     False             False             False           False      False  False  ...               False   False        False       False       False    True     False
+9833                  False     False             False             False           False      False  False  ...               False   False        False       False       False   False     False
+9834                  False     False             False             False           False      False  False  ...               False   False        False       False       False   False     False
+
+[9835 rows x 169 columns]
+
+(2) (10%) What’s the top 5 association rules? Show the support, confidence, and lift to each specific rule, respectively?
+             antecedents         consequents  antecedent support  consequent support   support  confidence      lift  leverage  conviction
+805         (whole milk)  (other vegetables)            0.255516            0.193493  0.074835    0.292877  1.513634  0.025394    1.140548
+804   (other vegetables)        (whole milk)            0.193493            0.255516  0.074835    0.386758  1.513634  0.025394    1.214013
+942         (rolls/buns)        (whole milk)            0.183935            0.255516  0.056634    0.307905  1.205032  0.009636    1.075696
+943         (whole milk)        (rolls/buns)            0.255516            0.183935  0.056634    0.221647  1.205032  0.009636    1.048452
+1098            (yogurt)        (whole milk)            0.139502            0.255516  0.056024    0.401603  1.571735  0.020379    1.244132
+                                             antecedents         consequents  antecedent support  consequent support   support  confidence      lift  leverage  conviction
+17343              (hygiene articles, pip fruit, butter)        (whole milk)            0.001017            0.255516  0.001017         1.0  3.913649  0.000757         inf
+17894                    (rice, root vegetables, butter)        (whole milk)            0.001017            0.255516  0.001017         1.0  3.913649  0.000757         inf
+20583            (napkins, cream cheese , domestic eggs)        (whole milk)            0.001118            0.255516  0.001118         1.0  3.913649  0.000833         inf
+28674  (pip fruit, root vegetables, bottled water, ot...        (whole milk)            0.001118            0.255516  0.001118         1.0  3.913649  0.000833         inf
+31284         (rolls/buns, newspapers, soda, whole milk)  (other vegetables)            0.001017            0.193493  0.001017         1.0  5.168156  0.000820         inf
+                                             antecedents                                     consequents  antecedent support  consequent support   support  confidence       lift  leverage  conviction
+2430                                            (liquor)                  (bottled beer, red/blush wine)            0.011083            0.004881  0.001932    0.174312  35.715787  0.001878    1.205200
+2429                      (bottled beer, red/blush wine)                                        (liquor)            0.004881            0.011083  0.001932    0.395833  35.715787  0.001878    1.636828
+32663                  (oil, tropical fruit, whole milk)     (yogurt, root vegetables, other vegetables)            0.002542            0.012913  0.001017    0.400000  30.976378  0.000984    1.645145
+32655                     (oil, yogurt, root vegetables)  (other vegetables, tropical fruit, whole milk)            0.001932            0.017082  0.001017    0.526316  30.811404  0.000984    2.075049
+32535  (whole milk, yogurt, other vegetables, domesti...                        (butter, tropical fruit)            0.003355            0.009964  0.001017    0.303030  30.411255  0.000983    1.420486
+
+(3) (5%) Please provide/guess the “story” to interpret one of top-5 rules you are interested in.
+
+(4) (10%) Give a visualization graph of your association rules.
