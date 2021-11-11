@@ -94,51 +94,51 @@ if __name__ == "__main__":
         test_size=0.33, random_state=42
     )
 
-    # model = sm.OLS(y_train, X_train).fit()
+    model = sm.OLS(y_train, X_train).fit()
 
-    # pvalue_results = dict({
-    #     "name": np.array(list([
-    #         item[0] for item in model.pvalues.items()
-    #     ])),
-    #     "pvalue": np.array(list([
-    #         item[1] for item in model.pvalues.items()
-    #     ]))
-    # })
-    # sorted_names = pvalue_results["name"][np.argsort(pvalue_results["pvalue"])]
-    # sorted_pvalues = pvalue_results["pvalue"][np.argsort(pvalue_results["pvalue"])]
-    # print(pd.DataFrame({
-    #     "Variable name": sorted_names,
-    #     "p-value": sorted_pvalues,
-    # }, index=None))
+    pvalue_results = dict({
+        "name": np.array(list([
+            item[0] for item in model.pvalues.items()
+        ])),
+        "pvalue": np.array(list([
+            item[1] for item in model.pvalues.items()
+        ]))
+    })
+    sorted_names = pvalue_results["name"][np.argsort(pvalue_results["pvalue"])]
+    sorted_pvalues = pvalue_results["pvalue"][np.argsort(pvalue_results["pvalue"])]
+    print(pd.DataFrame({
+        "Variable name": sorted_names,
+        "p-value": sorted_pvalues,
+    }, index=None))
 
-    # keep_idxs = list([x for x in range(1, len(df.columns) - 2)])
-    # maximum_rsquared = model.rsquared
-    # while keep_idxs:
-    #     print("Current r-squared = {:.8f}".format(maximum_rsquared))
-    #     maximum_rsquared_idx = -1
-    #     for i in keep_idxs:
-    #         trial_idx = copy.deepcopy(keep_idxs)
-    #         trial_idx.remove(i)
+    keep_idxs = list([x for x in range(1, len(df.columns) - 2)])
+    maximum_rsquared = model.rsquared
+    while keep_idxs:
+        print("Current r-squared = {:.8f}".format(maximum_rsquared))
+        maximum_rsquared_idx = -1
+        for i in keep_idxs:
+            trial_idx = copy.deepcopy(keep_idxs)
+            trial_idx.remove(i)
 
-    #         X_train_tmp, _, y_train_tmp, __ = train_test_split(
-    #             sm.add_constant(df.iloc[:, trial_idx]),
-    #             pd.DataFrame(df.iloc[:, -1]),
-    #             test_size=0.33, random_state=42
-    #         )
-    #         model = sm.OLS(
-    #             y_train_tmp,
-    #             X_train_tmp
-    #         ).fit()
-    #         print("Trying: {}, r-squared: {:.8f}, better: {}".format(trial_idx, model.rsquared, model.rsquared > maximum_rsquared))
-    #         if model.rsquared > maximum_rsquared:
-    #             maximum_rsquared = model.rsquared
-    #             maximum_rsquared_idx = i
-    #     if maximum_rsquared_idx == -1:
-    #         print("Already the best feature set!")
-    #         break
-    #     else:
-    #         print("Removing: {}".format(maximum_rsquared_idx))
-    #         keep_idxs.remove(maximum_rsquared_idx)
+            X_train_tmp, _, y_train_tmp, __ = train_test_split(
+                sm.add_constant(df.iloc[:, trial_idx]),
+                pd.DataFrame(df.iloc[:, -1]),
+                test_size=0.33, random_state=42
+            )
+            model = sm.OLS(
+                y_train_tmp,
+                X_train_tmp
+            ).fit()
+            print("Trying: {}, r-squared: {:.8f}, better: {}".format(trial_idx, model.rsquared, model.rsquared > maximum_rsquared))
+            if model.rsquared > maximum_rsquared:
+                maximum_rsquared = model.rsquared
+                maximum_rsquared_idx = i
+        if maximum_rsquared_idx == -1:
+            print("Already the best feature set!")
+            break
+        else:
+            print("Removing: {}".format(maximum_rsquared_idx))
+            keep_idxs.remove(maximum_rsquared_idx)
 
     clf = Ridge()
     clf.fit(X_train, y_train)
