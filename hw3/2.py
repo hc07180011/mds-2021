@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras import backend as K
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ModelCheckpoint
@@ -59,29 +59,32 @@ def _data_loader(target_shape=(300, 300), batch_size=128, random_seed=42):
     return (training_generator, validation_generator, testing_generator)
 
 
+def _f1_m(y_true, y_pred):
+    def precision_m(y_true, y_pred):
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+        precision = true_positives / (predicted_positives + K.epsilon())
+        return precision
+    def recall_m(y_true, y_pred):
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+        recall = true_positives / (possible_positives + K.epsilon())
+        return recall
+
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+    return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
+
+
 def _model_builder(input_shape, lr, conv_num):
-    def _f1_m(y_true, y_pred):
-        def precision_m(y_true, y_pred):
-            true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-            predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-            precision = true_positives / (predicted_positives + K.epsilon())
-            return precision
-        def recall_m(y_true, y_pred):
-            true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-            possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-            recall = true_positives / (possible_positives + K.epsilon())
-            return recall
-
-        precision = precision_m(y_true, y_pred)
-        recall = recall_m(y_true, y_pred)
-        return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
-
     model = Sequential()
     if conv_num == 2:
         model.add(Conv2D(32, 3, activation="relu", padding="same", strides=2, input_shape=input_shape))
         model.add(MaxPooling2D(pool_size=2, strides=2))
-    else:
         model.add(Conv2D(64, 3, activation="relu", padding="same", strides=2))
+        model.add(MaxPooling2D(pool_size=2, strides=2))
+    else:
+        model.add(Conv2D(64, 3, activation="relu", padding="same", strides=2, input_shape=input_shape))
         model.add(MaxPooling2D(pool_size=2, strides=2))
     model.add(Flatten())
     model.add(Dense(128, activation="relu"))
@@ -92,16 +95,15 @@ def _model_builder(input_shape, lr, conv_num):
         optimizer=Adam(learning_rate=lr),
         metrics=["accuracy", _f1_m]
     )
-    model.summary()
     return model
 
 
-def _do_experiment(lr, conv_num):
+def _do_experiment(lr, conv_num, epochs=30):
     model = _model_builder(target_shape+(1,), lr, conv_num)
     history = model.fit(
         training_generator,
         validation_data=validation_generator,
-        epochs=30,
+        epochs=epochs,
         verbose=1,
         callbacks=[ModelCheckpoint(
             "model_{}_{}.h5".format(lr, conv_num),
@@ -110,14 +112,20 @@ def _do_experiment(lr, conv_num):
             mode="max"
         )]
     )
+    np.save("{}_{}".format(lr, conv_num), history.history)
 
-    plt.plot(history.history["loss"])
-    plt.plot(history.history["val_loss"])
-    plt.plot(history.history["_f1_m"])
-    plt.plot(history.history["val__f1_m"])
+
+def _evaluation(lr, conv_num):
+    history = np.load("{}_{}.npy".format(lr, conv_num), allow_pickle=True).tolist()
+    plt.plot(history["loss"][1:])
+    plt.plot(history["val_loss"][1:])
+    plt.plot(history["_f1_m"][1:])
+    plt.plot(history["val__f1_m"][1:])
     plt.legend(["loss", "validation loss", "f1", "validation f1"])
     plt.savefig("2_{}_{}.png".format(lr, conv_num))
+    plt.close()
 
+    model = load_model("model_{}_{}.h5".format(lr, conv_num), custom_objects={"_f1_m": _f1_m})
     model.evaluate(testing_generator)
 
     threshold = 0.5
@@ -138,3 +146,7 @@ learning_rate_list = list([0.1, 0.01, 0.001, 0.0001])
 for lr in learning_rate_list:
     _do_experiment(lr, 2)
 _do_experiment(0.001, 1)
+
+for lr in learning_rate_list:
+    _evaluation(lr, 2)
+_evaluation(0.001, 1)
