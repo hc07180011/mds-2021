@@ -59,7 +59,7 @@ def _data_loader(target_shape=(300, 300), batch_size=128, random_seed=42):
     return (training_generator, validation_generator, testing_generator)
 
 
-def _model_builder(input_shape, lr):
+def _model_builder(input_shape, lr, conv_num):
     def _f1_m(y_true, y_pred):
         def precision_m(y_true, y_pred):
             true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
@@ -77,10 +77,12 @@ def _model_builder(input_shape, lr):
         return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
 
     model = Sequential()
-    model.add(Conv2D(32, 3, activation="relu", padding="same", strides=2, input_shape=input_shape))
-    model.add(MaxPooling2D(pool_size=2, strides=2))
-    model.add(Conv2D(64, 3, activation="relu", padding="same", strides=2))
-    model.add(MaxPooling2D(pool_size=2, strides=2))
+    if conv_num == 2:
+        model.add(Conv2D(32, 3, activation="relu", padding="same", strides=2, input_shape=input_shape))
+        model.add(MaxPooling2D(pool_size=2, strides=2))
+    else:
+        model.add(Conv2D(64, 3, activation="relu", padding="same", strides=2))
+        model.add(MaxPooling2D(pool_size=2, strides=2))
     model.add(Flatten())
     model.add(Dense(128, activation="relu"))
     model.add(Dense(1, activation="sigmoid"))
@@ -94,21 +96,15 @@ def _model_builder(input_shape, lr):
     return model
 
 
-target_shape = (300, 300)
-
-training_generator, validation_generator, testing_generator = _data_loader(target_shape=target_shape)
-
-learning_rate_list = list([0.1, 0.01, 0.001, 0.0001])
-
-for lr in learning_rate_list:
-    model = _model_builder(target_shape+(1,), lr)
+def _do_experiment(lr, conv_num):
+    model = _model_builder(target_shape+(1,), lr, conv_num)
     history = model.fit(
         training_generator,
         validation_data=validation_generator,
         epochs=10,
         verbose=1,
         callbacks=[ModelCheckpoint(
-            "model_{}.h5".format(lr),
+            "model_{}_{}.h5".format(lr, conv_num),
             save_best_only=True,
             monitor="val__f1_m",
             mode="max"
@@ -120,7 +116,7 @@ for lr in learning_rate_list:
     plt.plot(history.history["_f1_m"])
     plt.plot(history.history["val__f1_m"])
     plt.legend(["loss", "validation loss", "f1", "validation f1"])
-    plt.savefig("2_{}.png".format(lr))
+    plt.savefig("2_{}_{}.png".format(lr, conv_num))
 
     model.evaluate(testing_generator)
 
@@ -128,5 +124,17 @@ for lr in learning_rate_list:
     y_pred = (model.predict(testing_generator) > threshold).flatten()
     y_true = testing_generator.classes[testing_generator.index_array]
 
+    print("===== lr = {}, conv_num = {} =====".format(lr, conv_num))
     print(f1_score(y_true, y_pred))
     print(confusion_matrix(y_true, y_pred))
+
+
+target_shape = (300, 300)
+
+training_generator, validation_generator, testing_generator = _data_loader(target_shape=target_shape)
+
+learning_rate_list = list([0.1, 0.01, 0.001, 0.0001])
+
+for lr in learning_rate_list:
+    _do_experiment(lr, 2)
+_do_experiment(0.001, 1)
