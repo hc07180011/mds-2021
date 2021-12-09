@@ -110,20 +110,22 @@ def _do_experiment(
 
     print("Best index is: {}, f1-score = {}".format(max_idx, max_f1))
 
-    plt.plot([np.mean(x) for x in accuracy_record])
-    plt.xlabel("Depth")
+    x_label = "Max Depth" if classifier1 else "N Estimators" if classifier2 else "Learning Rate"
+
+    plt.plot([0, ] + list(range_), [np.mean(x) for x in accuracy_record])
+    plt.xlabel(x_label)
     plt.ylabel("Accuracy")
     plt.savefig("1-{}-acc.png".format(code))
     plt.close()
 
-    plt.plot([np.mean(x) for x in f1_score_record])
-    plt.xlabel("Depth")
+    plt.plot([0, ] + list(range_), [np.mean(x) for x in f1_score_record])
+    plt.xlabel(x_label)
     plt.ylabel("F1 Score")
     plt.savefig("1-{}-f1.png".format(code))
     plt.close()
 
-    plt.plot([np.mean(x) for x in roc_auc_record])
-    plt.xlabel("Depth")
+    plt.plot([0, ] + list(range_), [np.mean(x) for x in roc_auc_record])
+    plt.xlabel(x_label)
     plt.ylabel("ROC AUC Score")
     plt.savefig("1-{}-roc.png".format(code))
     plt.close()
