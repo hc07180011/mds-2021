@@ -1,11 +1,13 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from tensorflow.keras import backend as K
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 from tensorflow.keras.optimizers import Adam
-from sklearn.metrics import confusion_matrix, classification_report
+from tensorflow.keras.callbacks import ModelCheckpoint
+from sklearn.metrics import f1_score, confusion_matrix
 
 
 def _data_loader(target_shape=(300, 300), batch_size=128, random_seed=42):
@@ -58,6 +60,22 @@ def _data_loader(target_shape=(300, 300), batch_size=128, random_seed=42):
 
 
 def _model_builder(input_shape, lr):
+    def _f1_m(y_true, y_pred):
+        def precision_m(y_true, y_pred):
+            true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+            predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+            precision = true_positives / (predicted_positives + K.epsilon())
+            return precision
+        def recall_m(y_true, y_pred):
+            true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+            possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+            recall = true_positives / (possible_positives + K.epsilon())
+            return recall
+
+        precision = precision_m(y_true, y_pred)
+        recall = recall_m(y_true, y_pred)
+        return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
+
     model = Sequential()
     model.add(Conv2D(32, 3, activation="relu", padding="same", strides=2, input_shape=input_shape))
     model.add(MaxPooling2D(pool_size=2, strides=2))
@@ -70,7 +88,7 @@ def _model_builder(input_shape, lr):
     model.compile(
         loss="binary_crossentropy",
         optimizer=Adam(learning_rate=lr),
-        metrics=["accuracy"]
+        metrics=["accuracy", _f1_m]
     )
     model.summary()
     return model
@@ -80,10 +98,35 @@ target_shape = (300, 300)
 
 training_generator, validation_generator, testing_generator = _data_loader(target_shape=target_shape)
 
-model = _model_builder(target_shape+(1,), 0.001)
-model.fit(
-    training_generator,
-    validation_data=validation_generator,
-    epochs=30,
-    verbose=1
-)
+learning_rate_list = list([0.1, 0.01, 0.001, 0.0001])
+
+for lr in learning_rate_list:
+    model = _model_builder(target_shape+(1,), lr)
+    history = model.fit(
+        training_generator,
+        validation_data=validation_generator,
+        epochs=10,
+        verbose=1,
+        callbacks=[ModelCheckpoint(
+            "model_{}.h5".format(lr),
+            save_best_only=True,
+            monitor="val__f1_m",
+            mode="max"
+        )]
+    )
+
+    plt.plot(history.history["loss"])
+    plt.plot(history.history["val_loss"])
+    plt.plot(history.history["_f1_m"])
+    plt.plot(history.history["val__f1_m"])
+    plt.legend(["loss", "validation loss", "f1", "validation f1"])
+    plt.savefig("2_{}.png".format(lr))
+
+    model.evaluate(testing_generator)
+
+    threshold = 0.5
+    y_pred = (model.predict(testing_generator) > threshold).flatten()
+    y_true = testing_generator.classes[testing_generator.index_array]
+
+    print(f1_score(y_true, y_pred))
+    print(confusion_matrix(y_true, y_pred))
