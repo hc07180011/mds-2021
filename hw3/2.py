@@ -11,8 +11,8 @@ from sklearn.metrics import f1_score, confusion_matrix
 
 
 def _data_loader(target_shape=(300, 300), batch_size=128, random_seed=42):
-    train_dir = os.path.join("casting_data", "casting_data", "train")
-    test_dir = os.path.join("casting_data", "casting_data", "test")
+    train_dir = os.path.join("data", "casting_data", "casting_data", "train")
+    test_dir = os.path.join("data", "casting_data", "casting_data", "test")
 
     train_generator = ImageDataGenerator(rescale=1./255, validation_split=0.1)
     test_generator = ImageDataGenerator(rescale=1./255)
@@ -101,7 +101,7 @@ def _do_experiment(lr, conv_num):
     history = model.fit(
         training_generator,
         validation_data=validation_generator,
-        epochs=10,
+        epochs=30,
         verbose=1,
         callbacks=[ModelCheckpoint(
             "model_{}_{}.h5".format(lr, conv_num),
