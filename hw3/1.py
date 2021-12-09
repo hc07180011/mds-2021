@@ -133,7 +133,7 @@ def _do_experiment(
 
     clf = classifier1(max_depth=max_idx, random_state=42) if classifier1 \
         else classifier2(n_estimators=max_idx, random_state=42) if classifier2 \
-            else classifier3(learning_rate=max_idx, random_state=42),
+            else classifier3(learning_rate=max_idx, random_state=42)
     clf.fit(X_train, y_train)
 
     if classifier1:
