@@ -72,6 +72,9 @@ def _do_experiment(
         classifier3: GradientBoostingClassifier,
         code: str
     ) -> None:
+
+    print("===== {} =====".format(code))
+
     X_train = df.iloc[:, :-num_labels]
     X_train = StandardScaler().fit_transform(X_train)
 
@@ -83,7 +86,7 @@ def _do_experiment(
     f1_score_record.append(np.zeros(10))
     roc_auc_record.append(np.zeros(10))
 
-    range_ = range(1, 33) if classifier1 else range(10, 110, 10)
+    range_ = range(1, 33) if classifier1 else range(10, 110, 10) if classifier2 else [0.001, 0.01, 0.1, 1]
     for i in range_:
         results = cross_validate(
             classifier1(max_depth=i, random_state=42) if classifier1 \
@@ -200,4 +203,4 @@ if __name__ == "__main__":
 
     # h
     _do_experiment(prepared_df, None, None, GradientBoostingClassifier, "h1")
-    _do_experiment(prepared_df, None, None, GradientBoostingClassifier, "h2")
+    _do_experiment(balanced_df, None, None, GradientBoostingClassifier, "h2")
