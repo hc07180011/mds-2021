@@ -126,7 +126,7 @@ def _main() -> None:
     ans = tabu_search(jobs, 15, 30000)
 
     print("Weighted tardiness: {}".format(ans.obj))
-    print(", ".join([str(x) for x in ans.best_order]))
+    print("Schedule: " + ", ".join([str(x) for x in ans.best_order]))
 
     plt.figure(figsize=(16, 8))
     plt.plot(ans.tartiness_records)
