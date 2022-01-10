@@ -56,7 +56,7 @@ def _main() -> None:
         rul_list.append(np.max(df["time in cycles"]) - i - 1)
     df["RUL"] = rul_list
 
-    print(df)
+    print(df[["unit number", "time in cycles", "RUL"]])
 
     variation_list = list()
     for sensor in list([

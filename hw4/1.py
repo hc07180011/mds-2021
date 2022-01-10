@@ -95,6 +95,14 @@ def _main() -> None:
         lambda_=0.1,
         L=2.81
     )
+
+    UCL, EWMA, LCL = _simulate(
+        heart_rate_data,
+        mu=76.0,
+        sigma=3.0,
+        lambda_=0.5,
+        L=3.07
+    )
     plt.figure(figsize=(16, 4))
     plt.plot(UCL)
     plt.plot(EWMA)
