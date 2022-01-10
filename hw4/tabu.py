@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from tqdm import tqdm
+
 
 class Jobs:
 
@@ -22,6 +24,16 @@ class Jobs:
         self.due_dates = due_dates
         self.weights = weights
 
+    def calculate_obj(self, order: list[int]) -> int:
+        ret = 0
+        for i in range(len(order)):
+            p = 0
+            for j in range(i + 1):
+                p += self.processing_times[order[j]]
+            ret += self.weights[order[i]] * \
+                    max(p - self.due_dates[order[i]], 0)
+        return ret
+
 
 class Ans:
 
@@ -42,23 +54,12 @@ class Ans:
 
 
 def tabu_search(jobs: Jobs, window_size: int, epochs: int) -> Ans:
-
-    def _calculate_obj(order: list[int]) -> int:
-        ret = 0
-        for i in range(len(order)):
-            p = 0
-            for j in range(i + 1):
-                p += jobs.processing_times[order[j]]
-            ret += jobs.weights[order[i]] * \
-                    max(p - jobs.due_dates[order[i]], 0)
-        return ret
+    ans = Ans()
 
     job_order = np.arange(len(jobs.idxs))
     np.random.shuffle(job_order)
 
-    ans = Ans()
-
-    for _ in range(epochs):
+    for _ in tqdm(range(epochs)):
 
         ans.reset_local()
 
@@ -77,7 +78,7 @@ def tabu_search(jobs: Jobs, window_size: int, epochs: int) -> Ans:
                 try_order = job_order.copy()
                 try_order[j+1] = current_left
                 try_order[j] = current_right
-                current_obj = _calculate_obj(try_order)
+                current_obj = jobs.calculate_obj(try_order)
 
                 if current_obj < ans.local.obj:
                     ans.local.obj = current_obj
@@ -122,11 +123,12 @@ def _main() -> None:
         ))
     )
 
-    ans = tabu_search(jobs, 15, 1500)
+    ans = tabu_search(jobs, 15, 30000)
 
     print("Weighted tardiness: {}".format(ans.obj))
     print(", ".join([str(x) for x in ans.best_order]))
 
+    plt.figure(figsize=(16, 8))
     plt.plot(ans.tartiness_records)
     plt.xlabel("#Epoch")
     plt.ylabel("Tardiness")
